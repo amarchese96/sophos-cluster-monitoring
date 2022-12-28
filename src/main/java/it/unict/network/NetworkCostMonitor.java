@@ -75,5 +75,7 @@ public class NetworkCostMonitor {
                     String.valueOf(minCost)
             );
         });
+
+        log.info("------------------------------------");
     }
 }
