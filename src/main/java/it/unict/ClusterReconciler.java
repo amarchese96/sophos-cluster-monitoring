@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ClusterReconciler implements Reconciler<Cluster> { 
   private final KubernetesClient client;
@@ -41,7 +42,7 @@ public class ClusterReconciler implements Reconciler<Cluster> {
       client.nodes().withName(node.getMetadata().getName()).patch(node);
     });
 
-    return UpdateControl.noUpdate();
+    return UpdateControl.<Cluster>noUpdate().rescheduleAfter(resource.getSpec().getRunInterval(), TimeUnit.SECONDS);
   }
 }
 
