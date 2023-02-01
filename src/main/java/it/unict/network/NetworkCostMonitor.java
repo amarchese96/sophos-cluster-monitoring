@@ -27,7 +27,7 @@ public class NetworkCostMonitor {
     public void updateNetworkCosts(List<Node> nodeList) {
         List<String >nodeNameList = nodeList.stream().map(n-> n.getMetadata().getName()).collect(Collectors.toList());
 
-        Map<String, Map<String,Float>> latencyValues = telemetryService.getAllNodeLatencies().await().indefinitely();
+        Map<String, Map<String,Float>> latencyValues = telemetryService.getNodesLatencies().await().indefinitely();
 
         int highest = 0;
         int lowest = 0;
