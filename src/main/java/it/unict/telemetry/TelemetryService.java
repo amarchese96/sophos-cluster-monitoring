@@ -12,10 +12,26 @@ import java.util.Map;
 public interface TelemetryService {
 
     @GET
-    @Path("/metrics/node/latencies")
+    @Path("/metrics/nodes/latencies")
     Uni<Map<String,Float>> getNodeLatencies(@QueryParam("node") String node);
 
     @GET
-    @Path("/metrics/node/latencies")
-    Uni<Map<String,Map<String,Float>>> getAllNodeLatencies();
+    @Path("/metrics/nodes/latencies")
+    Uni<Map<String,Map<String,Float>>> getNodesLatencies();
+
+    @GET
+    @Path("/metrics/nodes/available-cpu")
+    Uni<Float> getNodeAvailableCpu(@QueryParam("node") String node);
+
+    @GET
+    @Path("/metrics/nodes/available-cpu")
+    Uni<Map<String,Float>> getNodesAvailableCpu();
+
+    @GET
+    @Path("/metrics/nodes/available-memory")
+    Uni<Float> getNodeAvailableMemory(@QueryParam("node") String node);
+
+    @GET
+    @Path("/metrics/nodes/available-memory")
+    Uni<Map<String,Float>> getNodesAvailableMemory();
 }
