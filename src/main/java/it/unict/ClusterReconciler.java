@@ -7,6 +7,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import it.unict.network.NetworkCostMonitor;
+import it.unict.resource.ResourceMonitor;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -19,6 +20,9 @@ public class ClusterReconciler implements Reconciler<Cluster> {
 
   @Inject
   NetworkCostMonitor networkCostMonitor;
+
+  @Inject
+  ResourceMonitor resourceMonitor;
 
   public ClusterReconciler(KubernetesClient client) {
     this.client = client;
@@ -36,6 +40,7 @@ public class ClusterReconciler implements Reconciler<Cluster> {
             .list()
             .getItems();
 
+    resourceMonitor.updateAvailableResources(nodeList);
     networkCostMonitor.updateNetworkCosts(nodeList);
 
     nodeList.forEach(node -> {
