@@ -6,17 +6,22 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
-import it.unict.network.NetworkCostMonitor;
-import it.unict.resource.ResourceMonitor;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class ClusterReconciler implements Reconciler<Cluster> { 
+public class ClusterReconciler implements Reconciler<Cluster> {
+
+  private static final Logger log = LoggerFactory.getLogger(ClusterReconciler.class);
+
   private final KubernetesClient client;
+
+  @Inject
+  ClusterGraphBuilder clusterGraphBuilder;
 
   @Inject
   NetworkCostMonitor networkCostMonitor;
@@ -35,19 +40,29 @@ public class ClusterReconciler implements Reconciler<Cluster> {
       nodeSelectorMap = new HashMap<>();
     }
 
-    List<Node> nodeList = client.nodes()
+    List<Node> nodes = client.nodes()
             .withLabelSelector(new LabelSelectorBuilder().withMatchLabels(nodeSelectorMap).build())
             .list()
             .getItems();
 
-    resourceMonitor.updateAvailableResources(nodeList);
-    networkCostMonitor.updateNetworkCosts(nodeList);
+    ClusterGraph clusterGraph = clusterGraphBuilder.buildClusterGraph(nodes);
 
-    nodeList.forEach(node -> {
+    if(resource.getSpec().isResourceMonitorEnabled()) {
+      log.info("Updating resources for cluster {}", resource.getMetadata().getName());
+      resourceMonitor.updateResources(clusterGraph);
+    }
+
+    if(resource.getSpec().isNetworkCostMonitorEnabled()) {
+      log.info("Updating network costs for cluster {}", resource.getMetadata().getName());
+      networkCostMonitor.updateNetworkCosts(clusterGraph);
+    }
+
+    clusterGraph.getClusterNodes().forEach(clusterNode -> {
+      Node node = clusterNode.getNode();
       client.nodes().withName(node.getMetadata().getName()).patch(node);
     });
 
-    return UpdateControl.<Cluster>noUpdate().rescheduleAfter(resource.getSpec().getRunInterval(), TimeUnit.SECONDS);
+    return UpdateControl.<Cluster>noUpdate().rescheduleAfter(resource.getSpec().getRunPeriod(), TimeUnit.SECONDS);
   }
 }
 
