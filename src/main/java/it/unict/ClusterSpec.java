@@ -4,20 +4,13 @@ import java.util.Map;
 
 public class ClusterSpec {
 
-    private final Map<String, String> nodeSelector;
+    private Map<String, String> nodeSelector;
 
-    private final Boolean resourceMonitorEnabled;
+    private Boolean resourceMonitorEnabled;
 
-    private final Boolean networkCostMonitorEnabled;
+    private Boolean networkCostMonitorEnabled;
 
-    private final Integer runPeriod;
-
-    public ClusterSpec(Map<String, String> nodeSelector, Boolean resourceMonitorEnabled, Boolean networkCostMonitorEnabled, Integer runPeriod) {
-        this.nodeSelector = nodeSelector;
-        this.resourceMonitorEnabled = resourceMonitorEnabled;
-        this.networkCostMonitorEnabled = networkCostMonitorEnabled;
-        this.runPeriod = runPeriod;
-    }
+    private Integer runPeriod;
 
     public Map<String, String> getNodeSelector(){
         return nodeSelector;
